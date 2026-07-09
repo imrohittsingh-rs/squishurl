@@ -121,7 +121,7 @@
   <div class="container">
 
     <% if (locals.id) { %>
-      <p>URL Generated: http://localhost:8001/<%= id %></p>
+      <p>URL Generated: http://localhost:<%= PORT %>/<%= id %></p>
     <% } %>
 
     <form method="POST" action="/url">
