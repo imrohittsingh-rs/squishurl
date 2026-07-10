@@ -29,6 +29,8 @@ connectToMongoDb(process.env.MONGO_URI)
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.locals.PORT = PORT;
+app.locals.BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+
 
 // MiddleWares
 app.use(express.json());

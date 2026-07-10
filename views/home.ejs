@@ -112,6 +112,17 @@
     td {
       color: #e2e8f0;
     }
+
+    a {
+      color: #38bdf8;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: #7dd3fc;
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -121,7 +132,7 @@
   <div class="container">
 
     <% if (locals.id) { %>
-      <p>URL Generated: http://localhost:<%= PORT %>/<%= id %></p>
+      <p>URL Generated: <%= BASE_URL %>/<%= id %></p>
     <% } %>
 
     <form method="POST" action="/url">
@@ -136,6 +147,7 @@
             <th>S. NO.</th>
             <th>ShortId</th>
             <th>Redirect</th>
+            <th>link</th>
             <th>Clicks</th>
           </tr>
         </thead>
@@ -146,6 +158,7 @@
               <td><%= index + 1 %></td>
               <td><%= url.shortId %></td>
               <td><%= url.redirectUrl %></td>
+              <td><a href="<%= BASE_URL %>/<%= url.shortId %>" target="_blank"><%= BASE_URL %>/<%= url.shortId %></a></td>
               <td><%= url.visitedHistory.length %></td>
             </tr>
           <% }) %>
