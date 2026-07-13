@@ -63,9 +63,8 @@ const handleGetWebsite = asyncHandler(async (req, res) => {
     .redirect(entry.redirectUrl);
 });
 
-
 const handleGetUserUrls = asyncHandler(async (req, res) => {
-  const urls = await URL.find({ createdBy: req.user.id });
+  const urls = await URL.find({ createdBy: req.user.id }).sort({ createdAt: -1 });
   return res
     .status(200)
     .json(new ApiResponse(200, urls, "User URLs fetched successfully"));

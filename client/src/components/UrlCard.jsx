@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
     FaCheck,
-    FaArrowPointer,
     FaArrowUpRightFromSquare,
     FaTrash,
     FaPen,
     FaXmark,
-    FaRegClock
+    FaRegClock,
+    FaChartSimple
 } from "react-icons/fa6";
 import { FiCopy } from "react-icons/fi";
 import { HiOutlineCursorClick } from "react-icons/hi";
@@ -14,16 +14,17 @@ import { BsArrowReturnRight } from "react-icons/bs";
 
 import toast from "react-hot-toast";
 
-const UrlCard = ({ url, backendUrl, onDelete, onUpdate }) => {
+const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(url.redirectUrl);
     const [copied, setCopied] = useState(false);
 
+    // get domain name from url for favicons
     const domain = (() => {
         try {
-            const u = new URL(url.redirectUrl);
+            const u = new URL(url.redirectUrl); // in-built URL constructor in js
             return u.hostname;
-        } catch (e) {
+        } catch (error) {
             return "link";
         }
     })();
@@ -43,21 +44,17 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate }) => {
         try {
             await onUpdate(url._id, editValue);
             setIsEditing(false);
-        } catch (e) {
-            // Errors handled by parent
+        } catch (error) {
+            console.log(error);
         }
     };
-
-    const expirationTime = url.expiresAt
-        ? new Date(url.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : "";
 
     return (
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow animate-fadeIn">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                {/* Left details */}
-                <div className="flex items-start md:items-center gap-4 flex-grow min-w-0">
-                    {/* Favicon */}
+
+                <div className="flex items-start md:items-center gap-3.5 flex-grow min-w-0">
+
                     <div className="w-11 h-11 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0">
                         <img
                             src={`https://www.google.com/s2/favicons?sz=64&domain=${domain}`}
@@ -72,34 +69,34 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate }) => {
                     </div>
 
                     <div className="min-w-0 flex-grow">
-                        <div className="flex items-center gap-2.5">
-                            <span className="font-medium text-gray-900 text-lg">
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-900 text-base md:text-lg truncate">
                                 {backendUrl.replace(/^https?:\/\//, "")}/{url.shortId}
                             </span>
                             <button
                                 onClick={handleCopy}
-                                className="text-gray-400 hover:text-gray-700 cursor-pointer"
+                                className="text-gray-400 hover:text-gray-700 cursor-pointer flex-shrink-0 p-1 hover:bg-gray-50 rounded"
                                 title="Copy Short URL"
                             >
                                 {copied ? (
-                                    <FaCheck className="text-green-500" />
+                                    <FaCheck className="text-green-500 text-sm" />
                                 ) : (
-                                    <FiCopy />
+                                    <FiCopy className="text-sm" />
                                 )}
                             </button>
                         </div>
 
                         {isEditing ? (
-                            <div className="flex items-center gap-2 mt-2 max-w-xl">
+                            <div className="flex items-center gap-2 mt-2 w-full max-w-xl">
                                 <input
                                     type="url"
                                     value={editValue}
                                     onChange={(e) => setEditValue(e.target.value)}
-                                    className="flex-grow bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#111111]"
+                                    className="flex-grow min-w-0 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 text-base sm:text-sm focus:outline-none focus:border-[#111111]"
                                 />
                                 <button
                                     onClick={handleSave}
-                                    className="text-green-600 hover:text-green-700 p-1.5 hover:bg-green-50 rounded-lg transition-colors cursor-pointer"
+                                    className="text-green-600 hover:text-green-700 p-1.5 hover:bg-green-50 rounded-lg transition-colors cursor-pointer flex-shrink-0"
                                     title="Save Changes"
                                 >
                                     <FaCheck />
@@ -109,24 +106,29 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate }) => {
                                         setIsEditing(false);
                                         setEditValue(url.redirectUrl);
                                     }}
-                                    className="text-gray-500 hover:text-gray-700 p-1.5 hover:bg-gray-100/75 rounded-lg transition-colors cursor-pointer"
+                                    className="text-gray-500 hover:text-gray-700 p-1.5 hover:bg-gray-100/75 rounded-lg transition-colors cursor-pointer flex-shrink-0"
                                     title="Cancel"
                                 >
                                     <FaXmark />
                                 </button>
                             </div>
                         ) : (
-                            <div className="text-gray-400 text-sm flex items-center gap-1.5 mt-1">
-                                <BsArrowReturnRight />
-                                <span className="truncate inline-block max-w-[280px] sm:max-w-[450px]" title={url.redirectUrl}>
+                            <div className="text-gray-400 text-xs md:text-sm flex items-center gap-1.5 mt-1 min-w-0">
+                                <BsArrowReturnRight className="flex-shrink-0" />
+                                <span className="truncate block flex-1 min-w-0" title={url.redirectUrl}>
                                     <a href={url.redirectUrl} className="text-gray-400 hover:underline transition-all">{url.redirectUrl}</a>
                                 </span>
+                            </div>
+                        )}
+                        {!url.expiresAt && (
+                            <div className="text-[10px] text-gray-400 mt-1 select-none font-medium">
+                                Created {new Date(url.createdAt).toLocaleDateString()}
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 flex-shrink-0 ml-15 md:ml-0">
+                <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto mt-2 md:mt-0 pt-3 md:pt-0 border-t border-gray-100 md:border-t-0 flex-shrink-0">
                     {url.expiresAt ? (
                         (() => {
                             const difference = new Date(url.expiresAt) - new Date();
@@ -137,13 +139,14 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate }) => {
                                 timeLeft = hrs > 0 ? `${hrs}h ${mins}m left` : `${mins}m left`;
                             }
                             return (
-                                <div className="flex flex-col border border-gray-200 rounded-xl bg-gray-50/50 text-center overflow-hidden min-w-[90px] shadow-sm select-none">
+                                <div className="flex flex-row md:flex-col border border-gray-200 rounded-xl bg-gray-50/50 text-center overflow-hidden min-w-[90px] shadow-sm select-none">
                                     <div className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700">
                                         <HiOutlineCursorClick className="text-blue-500 text-sm" />
                                         <span>{url.visitedHistory?.length || 0} clicks</span>
                                     </div>
-                                    <div className="border-t border-gray-200"></div>
-                                    <div className="flex items-center justify-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-orange-500 bg-white">
+                                    <div className="hidden md:block border-t border-gray-200"></div>
+                                    <div className="border-l md:border-l-0 md:border-t border-gray-200"></div>
+                                    <div className="flex items-center justify-center gap-1 px-2.5 py-1.5 md:py-1 text-[10px] font-semibold text-orange-500 bg-white">
                                         <FaRegClock className="text-[10px]" />
                                         <span>{timeLeft}</span>
                                     </div>
@@ -151,15 +154,10 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate }) => {
                             );
                         })()
                     ) : (
-                        <div className="text-right flex flex-col items-end gap-1">
-                            <span className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-600 py-1.5 px-3 rounded-lg text-xs font-semibold">
-                                <HiOutlineCursorClick className="text-blue-500 text-sm" />
-                                {url.visitedHistory?.length || 0} clicks
-                            </span>
-                            <div className="text-[10px] text-gray-400">
-                                Created {new Date(url.createdAt).toLocaleDateString()}
-                            </div>
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-600 py-1.5 px-2.5 md:px-3 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 select-none">
+                            <HiOutlineCursorClick className="text-blue-500 text-sm" />
+                            {url.visitedHistory?.length || 0} clicks
+                        </span>
                     )}
 
                     <div className="flex items-center gap-1.5">
@@ -172,6 +170,15 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate }) => {
                         >
                             <FaArrowUpRightFromSquare className="text-xs" />
                         </a>
+                        {onViewAnalytics && (
+                            <button
+                                onClick={() => onViewAnalytics(url)}
+                                className="p-2 border border-gray-200 hover:bg-gray-50 text-gray-500 hover:text-blue-600 rounded-lg transition-colors cursor-pointer"
+                                title="View Analytics"
+                            >
+                                <FaChartSimple className="text-xs" />
+                            </button>
+                        )}
                         {!url.expiresAt && (
                             <>
                                 <button

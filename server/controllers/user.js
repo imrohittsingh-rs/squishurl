@@ -68,9 +68,13 @@ const handleUserSignOut = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if(!user) {
+    throw new ApiError(401, "User not found");
+  }
   return res
     .status(200)
-    .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
+    .json(new ApiResponse(200, user, "Current user fetched successfully"));
 });
 
 export {
