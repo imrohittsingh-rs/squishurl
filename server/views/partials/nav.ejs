@@ -1,0 +1,32 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white mb-4">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <span class="brand-icon">S</span>
+      <span class="fw-bold fs-4 ms-2">SquishUrl</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Right Side elements matching image -->
+      <ul class="navbar-nav ms-auto align-items-center">
+        <% if (locals.user) { %>
+          <li class="nav-item me-3">
+            <span class="nav-link text-dark">Welcome, <strong><%= user.name %></strong></span>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-danger btn-sm px-3 fw-semibold" href="/user/logout" style="border-radius: 8px;">Sign Out</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item me-2">
+            <a class="btn btn-link text-decoration-none text-dark fw-semibold" href="/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-dark btn-sm px-4 fw-semibold" href="/signup" style="border-radius: 8px; padding-top: 8px; padding-bottom: 8px;">Sign up</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
