@@ -22,8 +22,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Public routes
-app.use("/api/user", userRoute);
-app.get("/api/:shortId", handleGetWebsite);
+app.use("/api/users", userRoute);
+app.get("/:shortId", handleGetWebsite);
+
+// Private routes
+app.use("/api/urls", urlRoute);
+
 
 // Global Error Handler
 app.use((err, req, res, next) => {

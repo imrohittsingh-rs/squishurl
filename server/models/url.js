@@ -25,7 +25,15 @@ const urlSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-      required: true,
+      required: false,
+    },
+    expiresAt: {
+      type: Date,
+      index: { expires: 0 }, // TTL index: MongoDB automatically deletes the document when expiresAt is reached
+    },
+    createdByIp: {
+      type: String,
+      required: false,
     },
   },
   {

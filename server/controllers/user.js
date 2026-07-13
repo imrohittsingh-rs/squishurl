@@ -6,7 +6,7 @@ import ApiError from "../utils/apiError.js";
 import { generateTokenForUser } from "../utils/authentication.js";
 
 const handleUserSignUp = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { fullName, email, password } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -14,7 +14,7 @@ const handleUserSignUp = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
-    name,
+    fullName,
     email,
     password,
   });
