@@ -16,12 +16,11 @@ import UrlStats from "./UrlStats";
 
 import toast from "react-hot-toast";
 
-const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
+const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics, onExpire }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(url.redirectUrl);
     const [copied, setCopied] = useState(false);
     const [imageError, setImageError] = useState(false);
-
 
     // get domain name from url for favicons
     const domain = (() => {
@@ -59,6 +58,8 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
         }
     };
 
+
+
     return (
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow animate-fadeIn">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -67,7 +68,7 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
 
                     <div className="w-11 h-11 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0">
                         {!domain || imageError ? (
-                            <TbWorld  className="text-gray-400 text-xl" />
+                            <TbWorld className="text-gray-400 text-xl" />
                         ) : (
                             <img
                                 src={`https://${domain}/favicon.ico`}
@@ -144,7 +145,10 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
 
                 <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto mt-2 md:mt-0 pt-3 md:pt-0 border-t border-gray-100 md:border-t-0 flex-shrink-0">
                     {url.expiresAt ? (
-                        <UrlStats url={url} />
+                        <UrlStats
+                            url={url}
+                            onExpire={onExpire}
+                        />
                     ) : (
                         <span className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-600 py-1.5 px-2.5 md:px-3 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 select-none">
                             <HiOutlineCursorClick className="text-blue-500 text-sm" />
@@ -162,7 +166,7 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
                         >
                             <FaArrowUpRightFromSquare className="text-xs" />
                         </a>
-                        {onViewAnalytics && (
+                        {onViewAnalytics && !url.expiresAt && (
                             <button
                                 onClick={() => onViewAnalytics(url)}
                                 className="p-2 border border-gray-200 hover:bg-gray-50 text-gray-500 hover:text-blue-600 rounded-lg transition-colors cursor-pointer"

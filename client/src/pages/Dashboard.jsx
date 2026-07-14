@@ -34,21 +34,22 @@ const Dashboard = () => {
       navigate("/login");
       return;
     }
+    
+    const fetchUrls = async () => {
+      try {
+        setLoading(true);
+        const res = await getUserUrls();
+        setUrls(res.data || []);
+      } catch (err) {
+        toast.error("Failed to retrieve shortened links");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchUrls();
   }, [user, authLoading, navigate]);
-
-  const fetchUrls = async () => {
-    try {
-      setLoading(true);
-      const res = await getUserUrls();
-      setUrls(res.data || []);
-    } catch (err) {
-      toast.error("Failed to retrieve shortened links");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this short URL?")) return;

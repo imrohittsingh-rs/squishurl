@@ -12,6 +12,7 @@ import {
   getUserUrls,
   deleteUrl,
   updateUrl,
+  getPublicStats
 } from "../services/urlService.js";
 import { FaWandMagicSparkles } from "react-icons/fa6";
 
@@ -31,27 +32,50 @@ const Home = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   const isGuestLimitReached = !user && urls.length >= 1;
 
-  const fetchUrls = async () => {
-    try {
-      if (user) {
-        // Authenticated user
-        const resData = await getUserUrls();
-        setUrls(resData.data);
-      } else {
-        // Guest user
-        const guestLink = JSON.parse(localStorage.getItem("guest_url") || "null");
+  const fetchGuestUrl = async () => {
+    const guestLink = JSON.parse(localStorage.getItem("guest_url") || "null");
 
-        if (guestLink) {
-          setUrls([guestLink])
-        } else {
+    if (guestLink) {
+      setUrls([guestLink]);
+      try {
+        const statsRes = await getPublicStats(guestLink.shortId);
+        const updatedLink = {
+          ...guestLink,
+          clicks: statsRes.data.clicks,
+          expiresAt: statsRes.data.expiresAt,
+        };
+        setUrls([updatedLink]);
+        localStorage.setItem("guest_url", JSON.stringify(updatedLink));
+      } catch (err) {
+        if (err.response?.status === 404) {
+          localStorage.removeItem("guest_url");
           setUrls([]);
+        } else {
+          console.error("Failed to fetch guest link stats:", err);
         }
       }
+    } else {
+      setUrls([]);
+    }
+  };
+
+  const fetchUserUrls = async () => {
+    localStorage.removeItem("guest_url");
+    try {
+      const resData = await getUserUrls();
+      setUrls(resData.data);
     } catch (err) {
       toast.error("Failed to fetch shortened links");
-    } finally {
-      setLoading(false);
     }
+  };
+
+  const fetchUrls = async () => {
+    if (user) {
+      await fetchUserUrls();
+    } else {
+      await fetchGuestUrl();
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -76,7 +100,12 @@ const Home = () => {
 
       if (!user) {
         // Store single guest link in localStorage
-        localStorage.setItem("guest_url", JSON.stringify(resData.data));
+        const guestUrl = {
+          ...resData.data,
+          clicks: resData.data.visitedHistory?.length || 0,
+        };
+
+        localStorage.setItem("guest_url", JSON.stringify(guestUrl));
       }
 
       fetchUrls(); // Refresh the list
@@ -112,6 +141,19 @@ const Home = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update URL");
       throw err;
+    }
+  };
+
+  const handleExpiredCard = async (id) => {
+    localStorage.removeItem("guest_url");
+    setUrls([]);
+    toast.error("Your temporary link has expired!");
+    try {
+      if (id) {
+        await deleteUrl(id);
+      }
+    } catch {
+      // Ignored: handled by mongodb TTL
     }
   };
 
@@ -205,14 +247,15 @@ const Home = () => {
           <Loader />
         ) : urls.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {urls.map((url) => (
+            {urls.map((url, idx) => (
               <UrlCard
-                key={url._id}
+                key={url._id || idx}
                 url={url}
                 backendUrl={backendUrl}
                 onDelete={handleDelete}
                 onUpdate={handleSaveEdit}
                 onViewAnalytics={user ? setActiveAnalyticsUrl : undefined}
+                onExpire={!user ? () => handleExpiredCard(url._id) : undefined}
               />
             ))}
           </div>

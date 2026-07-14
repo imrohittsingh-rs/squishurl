@@ -1,21 +1,54 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { HiOutlineCursorClick } from "react-icons/hi";
 import { FaRegClock } from "react-icons/fa6";
 
-const UrlStats = ({ url }) => {
-    const difference = new Date(url.expiresAt) - new Date();
-    let timeLeft = "Expired";
-    if (difference > 0) {
-        const hrs = Math.floor(difference / (1000 * 60 * 60));
-        const mins = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        timeLeft = hrs > 0 ? `${hrs}h ${mins}m left` : `${mins}m left`;
-    }
+const UrlStats = ({ url, onExpire }) => {
+    const [timeLeft, setTimeLeft] = useState("");
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const difference = new Date(url.expiresAt) - new Date();
+            if (difference <= 0) {
+                setTimeLeft("Expired");
+                if (onExpire) {
+                    onExpire();
+                }
+                return false;
+            }
+            const hrs = Math.floor(difference / (1000 * 60 * 60));
+            const mins = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((difference % (1000 * 60)) / 1000);
+
+            if (hrs > 0) {
+                setTimeLeft(`${hrs}h ${mins}m left`);
+            } else if (mins > 0) {
+                setTimeLeft(`${mins}m ${secs}s left`);
+            } else {
+                setTimeLeft(`${secs}s left`);
+            }
+            return true;
+        };
+
+        // Run once immediately
+        const isActive = calculateTimeLeft();
+        if (!isActive) return;
+
+        // Every second, it recalculates the remaining time ( for guest URL )
+        const interval = setInterval(() => {
+            const active = calculateTimeLeft();
+            if (!active) {
+                clearInterval(interval);
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [url.expiresAt, onExpire]);
 
     return (
         <div className="flex flex-row md:flex-col border border-gray-200 rounded-xl bg-gray-50/50 text-center overflow-hidden min-w-[90px] shadow-sm select-none">
             <div className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700">
                 <HiOutlineCursorClick className="text-blue-500 text-sm" />
-                <span>{url.visitedHistory?.length || 0} clicks</span>
+                <span>{url.clicks !== undefined ? url.clicks : (url.visitedHistory?.length || 0)} clicks</span>
             </div>
             <div className="hidden md:block border-t border-gray-200"></div>
             <div className="border-l md:border-l-0 md:border-t border-gray-200"></div>

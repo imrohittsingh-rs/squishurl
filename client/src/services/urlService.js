@@ -10,6 +10,11 @@ export const getUserUrls = async () => {
     return response.data
 }
 
+export const getPublicStats = async (shortId) => {
+    const response = await api.get(`/urls/stats/${shortId}`)
+    return response.data
+}
+
 export const getAnalytics = async (shortId) => {
     const response = await api.get(`/urls/analytics/${shortId}`)
     return response.data

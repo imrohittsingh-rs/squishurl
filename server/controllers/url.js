@@ -133,11 +133,31 @@ const handleUpdateUrl = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedUrl, "Url updated successfully"));
 });
 
+const handleGetPublicStats = asyncHandler(async (req, res) => {
+  const shortId = req.params.shortId;
+  const entry = await URL.findOne({ shortId });
+
+  if (!entry) {
+    throw new ApiError(404, "Url not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {
+      shortId: entry.shortId,
+      redirectUrl: entry.redirectUrl,
+      clicks: entry.visitedHistory.length,
+      expiresAt: entry.expiresAt,
+      createdAt: entry.createdAt
+    }, "Public stats fetched successfully"));
+});
+
 export {
   handleGenerateNewShortURL,
   handleGetWebsite,
   handleGetAnalytics,
   handleDeleteUrl,
   handleUpdateUrl,
-  handleGetUserUrls
+  handleGetUserUrls,
+  handleGetPublicStats
 };

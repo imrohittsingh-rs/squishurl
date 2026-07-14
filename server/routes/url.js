@@ -6,7 +6,8 @@ import {
   handleGetAnalytics,
   handleDeleteUrl,
   handleUpdateUrl,
-  handleGetUserUrls
+  handleGetUserUrls,
+  handleGetPublicStats
 } from "../controllers/url.js";
 import { checkForAuthentication, checkUserAuthentication } from "../middlewares/auth.js";
 
@@ -14,6 +15,7 @@ router.use(checkForAuthentication);
 
 router.post("/", handleGenerateNewShortURL);
 router.get("/analytics/:shortId", checkUserAuthentication, handleGetAnalytics);
+router.get("/stats/:shortId", handleGetPublicStats);
 
 router.get("/", checkUserAuthentication, handleGetUserUrls);
 router.patch("/:id", checkUserAuthentication, handleUpdateUrl);

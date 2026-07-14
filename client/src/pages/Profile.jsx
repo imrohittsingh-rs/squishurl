@@ -16,12 +16,11 @@ import {
 } from "react-icons/fa6";
 
 const Profile = () => {
-    const { user, loading: authLoading, logout } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const navigate = useNavigate();
 
     const [urls, setUrls] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
 
     useEffect(() => {
         if (authLoading) return;
@@ -36,7 +35,7 @@ const Profile = () => {
                 const res = await getUserUrls();
                 setUrls(res.data || []);
             } catch (err) {
-                setError(err.response?.data?.message || "Failed to load links data");
+                console.error(err.response?.data?.message || "Failed to load links data");
                 toast.error("Failed to load user analytics");
             } finally {
                 setLoading(false);
@@ -44,7 +43,7 @@ const Profile = () => {
         };
 
         fetchAllUrls();
-    }, [user, authLoading]);
+    }, [user, authLoading, navigate]);
 
     const joinedOn = user?.createdAt
         ? new Date(user.createdAt).toLocaleDateString("en-IN", {
