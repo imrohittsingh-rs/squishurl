@@ -22,6 +22,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Public routes
+app.get("/favicon.ico", (req, res) => res.status(204).end());
 app.use("/api/users", userRoute);
 app.get("/:shortId", handleGetWebsite);
 
