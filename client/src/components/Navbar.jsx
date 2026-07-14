@@ -2,6 +2,7 @@ import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/images/logo.png";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -10,6 +11,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     await logout();
     navigate("/login");
+    toast.success("Logged out successfully")
   };
 
   return (

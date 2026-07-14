@@ -12,7 +12,7 @@ const Footer = () => {
           </span>
         </div>
         <div className="text-xs text-gray-400">
-          <p>© {new Date().getFullYear()} SquishUrl. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} SquishUrl. All rights reserved.</p>
         </div>
       </div>
     </footer>

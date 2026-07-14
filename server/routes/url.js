@@ -13,7 +13,7 @@ import { checkForAuthentication, checkUserAuthentication } from "../middlewares/
 router.use(checkForAuthentication);
 
 router.post("/", handleGenerateNewShortURL);
-router.get("/analytics/:shortId", handleGetAnalytics);
+router.get("/analytics/:shortId", checkUserAuthentication, handleGetAnalytics);
 
 router.get("/", checkUserAuthentication, handleGetUserUrls);
 router.patch("/:id", checkUserAuthentication, handleUpdateUrl);

@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getUserUrls } from "../services/urlService";
+import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 
-// Icons
 import {
     FaUser,
     FaEnvelope,
@@ -60,11 +60,7 @@ const Profile = () => {
     const averageClicks = totalUrls > 0 ? (totalClicks / totalUrls).toFixed(1) : "0.0";
 
     if (authLoading || loading) {
-        return (
-            <div className="flex justify-center items-center py-24">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#111111]"></div>
-            </div>
-        );
+        return <Loader />;
     }
 
     return (

@@ -27,8 +27,8 @@ const handleGenerateNewShortURL = asyncHandler(async (req, res) => {
       );
     }
     urlData.createdByIp = req.ip;
-    // Guest link: valid for 1 hour
-    urlData.expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    // Guest link: valid for 15 minutes
+    urlData.expiresAt = new Date(Date.now() + 15 * 60 * 1000);
   }
 
   const url = await URL.create(urlData);
@@ -76,6 +76,10 @@ const handleGetAnalytics = asyncHandler(async (req, res) => {
 
   if (!entry) {
     throw new ApiError(404, "Url not found");
+  }
+
+  if (!entry.createdBy || entry.createdBy.toString() !== req.user.id.toString()) {
+    throw new ApiError(403, "You are not authorized to view analytics for this url");
   }
 
   return res

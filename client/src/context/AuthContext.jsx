@@ -12,8 +12,6 @@ import {
   getCurrentUser
 } from "../services/authService.js"
 
-import api from "../api/axios";
-
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);

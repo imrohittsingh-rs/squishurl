@@ -8,9 +8,9 @@ import {
 } from "../services/urlService";
 import UrlCard from "../components/UrlCard";
 import AnalyticsModal from "../components/AnalyticsModal";
+import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 
-// Icons
 import { FaPlus, FaLink, FaChartSimple, FaArrowPointer } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
 import { HiOutlineCursorClick } from "react-icons/hi";
@@ -19,7 +19,6 @@ const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // State
   const [urls, setUrls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,15 +27,17 @@ const Dashboard = () => {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-  // Redirect if not logged in
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (authLoading) return;
+
+    if (!user) {
       navigate("/login");
+      return;
     }
+    fetchUrls();
   }, [user, authLoading, navigate]);
 
   const fetchUrls = async () => {
-    if (!user) return;
     try {
       setLoading(true);
       const res = await getUserUrls();
@@ -48,12 +49,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (user) {
-      fetchUrls();
-    }
-  }, [user]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this short URL?")) return;
@@ -90,41 +85,43 @@ const Dashboard = () => {
   )[0];
 
   // Filtering & Sorting
+  const query = searchTerm.toLowerCase();
+
   const filteredUrls = urls
     .filter((url) => {
-      const target = url.redirectUrl.toLowerCase();
-      const code = url.shortId.toLowerCase();
-      const query = searchTerm.toLowerCase();
-      return target.includes(query) || code.includes(query);
+      return (
+        url.shortId.toLowerCase().includes(query) ||
+        url.redirectUrl.toLowerCase().includes(query)
+      );
     })
     .sort((a, b) => {
-      if (sortBy === "newest") {
-        return new Date(b.createdAt) - new Date(a.createdAt);
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.createdAt) - new Date(a.createdAt);
+
+        case "oldest":
+          return new Date(a.createdAt) - new Date(b.createdAt);
+
+        case "clicks_desc":
+          return (b.visitedHistory?.length || 0) -
+            (a.visitedHistory?.length || 0);
+
+        case "clicks_asc":
+          return (a.visitedHistory?.length || 0) -
+            (b.visitedHistory?.length || 0);
+
+        default:
+          return 0;
       }
-      if (sortBy === "oldest") {
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      }
-      if (sortBy === "clicks_desc") {
-        return (b.visitedHistory?.length || 0) - (a.visitedHistory?.length || 0);
-      }
-      if (sortBy === "clicks_asc") {
-        return (a.visitedHistory?.length || 0) - (b.visitedHistory?.length || 0);
-      }
-      return 0;
     });
 
   if (authLoading || (!user && authLoading)) {
-    return (
-      <div className="flex justify-center items-center py-24">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
     <div className="max-w-5xl mx-auto px-4 pb-20 animate-fadeIn">
-      
-      {/* Title Header with primary CTA */}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-gray-950 tracking-tight">Your Dashboard</h1>
@@ -141,7 +138,6 @@ const Dashboard = () => {
         </Link>
       </div>
 
-      {/* Analytics Summary Stats Banner Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
@@ -176,8 +172,10 @@ const Dashboard = () => {
         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
             <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Most Popular</span>
-            <span className="block text-sm font-bold text-gray-950 mt-2 truncate" title={mostPopular ? `${backendUrl.replace(/^https?:\/\//, "")}/${mostPopular.shortId}` : "N/A"}>
-              {mostPopular ? `${backendUrl.replace(/^https?:\/\//, "")}/${mostPopular.shortId}` : "None"}
+            <span className="block text-sm font-bold text-gray-950 mt-2 truncate">
+              <Link to={`${backendUrl}/${mostPopular?.shortId}`} target="_blank" className="hover:underline">
+                {mostPopular ? `${backendUrl.replace(/^https?:\/\//, "")}/${mostPopular.shortId}` : "None"}
+              </Link>
             </span>
           </div>
           <div className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-amber-500 bg-amber-50 py-1 px-2.5 rounded-full w-max">
@@ -186,14 +184,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* URL Grid List Controls */}
       <div className="bg-white rounded-3xl border border-gray-100 p-5 md:p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <h2 className="text-xl font-bold text-gray-950">Links Management</h2>
 
-          {/* Search and Sort controls */}
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-            {/* Search Input */}
+
             <div className="relative flex-grow sm:flex-grow-0 sm:w-64">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                 <FiSearch className="text-sm" />
@@ -207,7 +203,6 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* Sort Select */}
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -221,11 +216,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* URL Card Flex List */}
         {loading ? (
-          <div className="flex justify-center items-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
-          </div>
+          <Loader />
         ) : filteredUrls.length > 0 ? (
           <div className="flex flex-col gap-4">
             {filteredUrls.map((url) => (
@@ -256,7 +248,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Analytics Modal Overlays */}
       {activeAnalyticsUrl && (
         <AnalyticsModal
           url={activeAnalyticsUrl}

@@ -4,12 +4,14 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import Hero from "../components/Hero";
 import UrlCard from "../components/UrlCard";
+import AnalyticsModal from "../components/AnalyticsModal";
+import Loader from "../components/Loader";
+
 import {
   generateShortURL,
   getUserUrls,
   deleteUrl,
   updateUrl,
-  getAnalytics
 } from "../services/urlService.js";
 import { FaWandMagicSparkles } from "react-icons/fa6";
 
@@ -19,6 +21,9 @@ const Home = () => {
   const [urls, setUrls] = useState([]);
   const [urlInput, setUrlInput] = useState("");
   const [generatedId, setGeneratedId] = useState("");
+
+  const [activeAnalyticsUrl, setActiveAnalyticsUrl] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [copiedId, setCopiedId] = useState("");
@@ -33,34 +38,16 @@ const Home = () => {
         const resData = await getUserUrls();
         setUrls(resData.data);
       } else {
-        // Guest user - sync with localStorage guest list
-        const guestList = JSON.parse(localStorage.getItem("guest_urls") || "[]");
+        // Guest user
+        const guestLink = JSON.parse(localStorage.getItem("guest_url") || "null");
 
-        if (guestList.length > 0) {
-          const guestLink = guestList[0];
-          try {
-            const resData = await getAnalytics(guestLink.shortId);
-            const updatedLink = {
-              ...guestLink,
-              visitedHistory: resData.data.visitedHistory
-            };
-            setUrls([updatedLink]);
-            localStorage.setItem("guest_urls", JSON.stringify([updatedLink]));
-          } catch (err) {
-            if (err.response?.status === 404) {
-              // Expired, clear from client
-              localStorage.removeItem("guest_urls");
-              setUrls([]);
-            } else {
-              console.error("Failed to fetch guest link analytics:", err);
-            }
-          }
+        if (guestLink) {
+          setUrls([guestLink])
         } else {
           setUrls([]);
         }
       }
     } catch (err) {
-      console.error("Failed to fetch URLs:", err);
       toast.error("Failed to fetch shortened links");
     } finally {
       setLoading(false);
@@ -73,7 +60,10 @@ const Home = () => {
 
   const handleShorten = async (e) => {
     e.preventDefault();
-    if (!urlInput.trim()) return;
+    if (!urlInput.trim()) {
+      toast.error("Please enter a URL");
+      return;
+    }
 
     setSubmitting(true);
     setGeneratedId("");
@@ -85,10 +75,8 @@ const Home = () => {
       setUrlInput("");
 
       if (!user) {
-        // Add to guest links list in localStorage
-        const guestUrls = JSON.parse(localStorage.getItem("guest_urls") || "[]");
-        guestUrls.unshift(resData.data);
-        localStorage.setItem("guest_urls", JSON.stringify(guestUrls));
+        // Store single guest link in localStorage
+        localStorage.setItem("guest_url", JSON.stringify(resData.data));
       }
 
       fetchUrls(); // Refresh the list
@@ -101,9 +89,12 @@ const Home = () => {
 
   const handleDelete = async (id) => {
     try {
+      if (!window.confirm("Are you sure you want to delete this URL?")) {
+        return;
+      }
       await deleteUrl(id);
       toast.success("URL deleted successfully");
-      setUrls(urls.filter((url) => url._id !== id));
+      setUrls((prev) => prev.filter((url) => url._id !== id));
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete URL");
     }
@@ -114,7 +105,7 @@ const Home = () => {
       const resData = await updateUrl(id, newUrl);
       toast.success("Destination URL updated!");
       setUrls(
-        urls.map((url) =>
+        (prev) => prev.map((url) =>
           url._id === id ? { ...url, redirectUrl: resData.data.redirectUrl } : url
         )
       );
@@ -124,11 +115,15 @@ const Home = () => {
     }
   };
 
-  const copyToClipboard = (text, id) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    toast.success("Copied to clipboard!");
-    setTimeout(() => setCopiedId(""), 2000);
+  const copyToClipboard = async (text, id) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      toast.success("Copied to clipboard!");
+      setTimeout(() => setCopiedId(""), 2000);
+    } catch (err) {
+      toast.error("Failed to copy to clipboard!");
+    }
   };
 
   return (
@@ -151,8 +146,8 @@ const Home = () => {
             <button
               onClick={() => copyToClipboard(`${backendUrl}/${generatedId}`, "success-alert")}
               className={`text-xs md:text-sm font-semibold py-2 px-4 rounded-lg shrink-0 transition-all active:scale-95 cursor-pointer ${copiedId === "success-alert"
-                  ? "bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200/80"
-                  : "bg-[#111111] hover:bg-black text-white"
+                ? "bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200/80"
+                : "bg-[#111111] hover:bg-black text-white"
                 }`}
             >
               {copiedId === "success-alert" ? "Copied!" : "Copy"}
@@ -184,16 +179,16 @@ const Home = () => {
       </div>
 
       {!user && urls.length > 0 && (
-        <div className="p-4 rounded-xl mb-6 text-xs md:text-sm font-medium flex items-center justify-between animate-fadeIn bg-sky-50 border border-sky-100 text-sky-800">
+        <div className="p-4 rounded-xl mb-6 text-xs md:text-sm font-medium flex items-center justify-between animate-fadeIn bg-orange-50 border border-orange-100 text-orange-800">
           <span>
             {isGuestLimitReached && (
               <>
                 🚨 <strong>Guest limit reached!</strong> You can only create 1 temporary link. Please{" "}
-                <Link to="/login" className="underline font-bold hover:text-sky-950">
+                <Link to="/login" className="underline font-bold hover:text-orange-950">
                   Login
                 </Link>{" "}
                 or{" "}
-                <Link to="/signup" className="underline font-bold hover:text-sky-950">
+                <Link to="/signup" className="underline font-bold hover:text-orange-950">
                   Sign Up
                 </Link>{" "}
                 to create unlimited permanent links, update redirect URLs, and track links over time.
@@ -207,9 +202,7 @@ const Home = () => {
         <h4 className="text-xl font-bold mb-4 text-gray-800">Your Shortened Links</h4>
 
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#111111]"></div>
-          </div>
+          <Loader />
         ) : urls.length > 0 ? (
           <div className="flex flex-col gap-4">
             {urls.map((url) => (
@@ -219,6 +212,7 @@ const Home = () => {
                 backendUrl={backendUrl}
                 onDelete={handleDelete}
                 onUpdate={handleSaveEdit}
+                onViewAnalytics={user ? setActiveAnalyticsUrl : undefined}
               />
             ))}
           </div>
@@ -228,6 +222,14 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      {activeAnalyticsUrl && (
+        <AnalyticsModal
+          url={activeAnalyticsUrl}
+          onClose={() => setActiveAnalyticsUrl(null)}
+          backendUrl={backendUrl}
+        />
+      )}
     </div>
   );
 };

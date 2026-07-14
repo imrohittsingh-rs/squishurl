@@ -5,12 +5,14 @@ import {
     FaTrash,
     FaPen,
     FaXmark,
-    FaRegClock,
     FaChartSimple
 } from "react-icons/fa6";
 import { FiCopy } from "react-icons/fi";
 import { HiOutlineCursorClick } from "react-icons/hi";
 import { BsArrowReturnRight } from "react-icons/bs";
+import { TbWorld } from "react-icons/tb";
+import UrlStats from "./UrlStats";
+
 
 import toast from "react-hot-toast";
 
@@ -18,6 +20,8 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(url.redirectUrl);
     const [copied, setCopied] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
 
     // get domain name from url for favicons
     const domain = (() => {
@@ -25,15 +29,20 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
             const u = new URL(url.redirectUrl); // in-built URL constructor in js
             return u.hostname;
         } catch (error) {
-            return "link";
+            return null;
         }
     })();
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(`${backendUrl}/${url.shortId}`);
-        setCopied(true);
-        toast.success("Short URL copied!");
-        setTimeout(() => setCopied(false), 2000);
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(`${backendUrl}/${url.shortId}`);
+            setCopied(true);
+            toast.success("Short URL copied!");
+            setTimeout(() => setCopied(false), 2000);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to copy URL");
+        }
     };
 
     const handleSave = async () => {
@@ -45,7 +54,8 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
             await onUpdate(url._id, editValue);
             setIsEditing(false);
         } catch (error) {
-            console.log(error);
+            // console.log(error);
+            // error is handled by the parent (handleSaveEdit)
         }
     };
 
@@ -56,16 +66,18 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
                 <div className="flex items-start md:items-center gap-3.5 flex-grow min-w-0">
 
                     <div className="w-11 h-11 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0">
-                        <img
-                            src={`https://www.google.com/s2/favicons?sz=64&domain=${domain}`}
-                            alt={domain}
-                            width="20"
-                            height="20"
-                            className="rounded-full object-contain"
-                            onError={(e) => {
-                                e.target.src = "https://www.google.com/s2/favicons?sz=64&domain=google.com";
-                            }}
-                        />
+                        {!domain || imageError ? (
+                            <TbWorld  className="text-gray-400 text-xl" />
+                        ) : (
+                            <img
+                                src={`https://${domain}/favicon.ico`}
+                                alt={domain}
+                                width="20"
+                                height="20"
+                                className="rounded-full object-contain"
+                                onError={() => setImageError(true)}
+                            />
+                        )}
                     </div>
 
                     <div className="min-w-0 flex-grow">
@@ -120,39 +132,19 @@ const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics }) => {
                                 </span>
                             </div>
                         )}
+
                         {!url.expiresAt && (
                             <div className="text-[10px] text-gray-400 mt-1 select-none font-medium">
                                 Created {new Date(url.createdAt).toLocaleDateString()}
                             </div>
                         )}
+
                     </div>
                 </div>
 
                 <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto mt-2 md:mt-0 pt-3 md:pt-0 border-t border-gray-100 md:border-t-0 flex-shrink-0">
                     {url.expiresAt ? (
-                        (() => {
-                            const difference = new Date(url.expiresAt) - new Date();
-                            let timeLeft = "Expired";
-                            if (difference > 0) {
-                                const hrs = Math.floor(difference / (1000 * 60 * 60));
-                                const mins = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-                                timeLeft = hrs > 0 ? `${hrs}h ${mins}m left` : `${mins}m left`;
-                            }
-                            return (
-                                <div className="flex flex-row md:flex-col border border-gray-200 rounded-xl bg-gray-50/50 text-center overflow-hidden min-w-[90px] shadow-sm select-none">
-                                    <div className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700">
-                                        <HiOutlineCursorClick className="text-blue-500 text-sm" />
-                                        <span>{url.visitedHistory?.length || 0} clicks</span>
-                                    </div>
-                                    <div className="hidden md:block border-t border-gray-200"></div>
-                                    <div className="border-l md:border-l-0 md:border-t border-gray-200"></div>
-                                    <div className="flex items-center justify-center gap-1 px-2.5 py-1.5 md:py-1 text-[10px] font-semibold text-orange-500 bg-white">
-                                        <FaRegClock className="text-[10px]" />
-                                        <span>{timeLeft}</span>
-                                    </div>
-                                </div>
-                            );
-                        })()
+                        <UrlStats url={url} />
                     ) : (
                         <span className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-600 py-1.5 px-2.5 md:px-3 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 select-none">
                             <HiOutlineCursorClick className="text-blue-500 text-sm" />
