@@ -1,7 +1,105 @@
 import React, { useEffect, useState } from "react";
-import { FaXmark } from "react-icons/fa6";
+import {
+  FaGithub,
+  FaLinkedin,
+  FaGoogle,
+  FaFacebook,
+  FaChrome,
+  FaEdge,
+  FaFirefoxBrowser,
+  FaSafari,
+  FaGlobe,
+  FaWhatsapp
+} from "react-icons/fa";
+import { FaXTwitter, FaXmark } from "react-icons/fa6";
 import { getAnalytics } from "../services/urlService";
 import toast from "react-hot-toast";
+
+const sourceMap = {
+  "github.com": {
+    label: "GitHub",
+    icon: <FaGithub className="text-gray-900 shrink-0" size={13} />,
+  },
+  "linkedin.com": {
+    label: "LinkedIn",
+    icon: <FaLinkedin className="text-blue-600 shrink-0" size={13} />,
+  },
+  "x.com": {
+    label: "X (Twitter)",
+    icon: <FaXTwitter className="text-gray-900 shrink-0" size={13} />,
+  },
+  "google.com": {
+    label: "Google",
+    icon: <FaGoogle className="text-yellow-600 shrink-0" size={13} />,
+  },
+  "facebook.com": {
+    label: "Facebook",
+    icon: <FaFacebook className="text-blue-700 shrink-0" size={13} />,
+  },
+  "whatsapp.com": {
+    label: "WhatsApp",
+    icon: <FaWhatsapp className="text-green-600 shrink-0" size={13} />,
+  },
+  "web.whatsapp.com": {
+    label: "WhatsApp",
+    icon: <FaWhatsapp className="text-green-600 shrink-0" size={13} />,
+  }
+};
+
+const handleReferer = (item) => {
+  if (!item.referer) return {
+    label: "Direct",
+    icon: <FaGlobe className="text-gray-700 shrink-0" size={13} />,
+  };
+
+  try {
+    const hostname = new URL(item.referer)
+      .hostname
+      .replace(/^www\./, "") // remove www. Prefix if present
+      .toLowerCase();
+
+    return sourceMap[hostname] || {
+      label: hostname,
+      icon: <FaGlobe className="text-gray-700 shrink-0" size={13} />,
+    };
+  } catch {
+    return {
+      label: "Unknown",
+      icon: <FaGlobe className="text-gray-700 shrink-0" size={13} />,
+    };
+  }
+};
+
+const getBrowser = (userAgent = "") => {
+  const lower = userAgent.toLowerCase();
+
+  if (lower.includes("edg")) {
+    return {
+      label: "Edge",
+      icon: <FaEdge className="text-cyan-500 shrink-0" size={13} />,
+    };
+  } else if (lower.includes("chrome")) {
+    return {
+      label: "Chrome",
+      icon: <FaChrome className="text-blue-500 shrink-0" size={13} />,
+    };
+  } else if (lower.includes("firefox")) {
+    return {
+      label: "Firefox",
+      icon: <FaFirefoxBrowser className="text-orange-500 shrink-0" size={13} />,
+    };
+  } else if (lower.includes("safari")) {
+    return {
+      label: "Safari",
+      icon: <FaSafari className="text-blue-600 shrink-0" size={13} />,
+    };
+  } else {
+    return {
+      label: "Unknown",
+      icon: <FaGlobe className="text-gray-700 shrink-0" size={13} />,
+    };
+  }
+};
 
 const AnalyticsModal = ({ url, onClose, backendUrl }) => {
   const [data, setData] = useState(null);
@@ -71,32 +169,40 @@ const AnalyticsModal = ({ url, onClose, backendUrl }) => {
                         <tr className="border-b border-gray-100">
                           <th className="px-4 py-2.5">Time</th>
                           <th className="px-4 py-2.5">IP Address</th>
-                          <th className="px-4 py-2.5">Referrer</th>
-                          <th className="px-4 py-2.5">User Agent</th>
+                          <th className="px-4 py-2.5">Source</th>
+                          <th className="px-4 py-2.5">Browser</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50 text-gray-600">
-                        {[...history].map((item, idx) => (
-                          <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                            <td className="px-4 py-2.5 whitespace-nowrap font-medium">
-                              {new Date(item.timestamp).toLocaleString("en-IN", {
-                                dateStyle: "medium",
-                                timeStyle: "short"
-                              })}
-                            </td>
-                            <td className="px-4 py-2.5 font-mono text-[11px] whitespace-nowrap font-semibold">
-                              {item.ip || "N/A"}
-                            </td>
-                            <td className="px-4 py-2.5 truncate max-w-[120px] font-medium" title={item.referer}>
-                              {item.referer
-                                ? new URL(item.referer).hostname
-                                : "Direct"}
-                            </td>
-                            <td className="px-4 py-2.5 truncate max-w-[160px] font-medium" title={item.userAgent}>
-                              {item.userAgent || "N/A"}
-                            </td>
-                          </tr>
-                        ))}
+                        {[...history].reverse().map((item, idx) => {
+                          const source = handleReferer(item);
+                          const browser = getBrowser(item.userAgent);
+                          return (
+                            <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                              <td className="px-4 py-2.5 whitespace-nowrap font-medium">
+                                {new Date(item.timestamp).toLocaleString("en-IN", {
+                                  dateStyle: "medium",
+                                  timeStyle: "short"
+                                })}
+                              </td>
+                              <td className="px-4 py-2.5 font-mono text-[11px] whitespace-nowrap font-semibold">
+                                {item.ip || "N/A"}
+                              </td>
+                              <td className="px-4 py-2.5 truncate max-w-[120px] font-medium font-semibold text-gray-900" title={item.referer}>
+                                <div className="flex items-center gap-2">
+                                  {source.icon}
+                                  <span className="font-medium font-semibold text-gray-900">{source.label}</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-2.5 truncate max-w-[160px] font-medium" title={item.userAgent}>
+                                <div className="flex items-center gap-2">
+                                  {browser.icon}
+                                  <span className="font-medium font-semibold text-gray-900">{browser.label}</span>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

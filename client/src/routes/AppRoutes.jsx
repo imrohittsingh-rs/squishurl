@@ -7,6 +7,7 @@ import Signup from '../pages/Signup.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import CreateUrlForm from '../pages/CreateUrlForm.jsx';
 import Profile from '../pages/Profile.jsx';
+import Features from '../pages/Features.jsx';
 import NotFound from '../pages/NotFound.jsx';
 
 const AppRoutes = () => {
@@ -18,6 +19,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/create-url" element={<CreateUrlForm />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/features" element={<Features />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
