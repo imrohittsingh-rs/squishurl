@@ -6,6 +6,7 @@ import ApiResponse from "../utils/apiResponse.js";
 
 const handleGenerateNewShortURL = asyncHandler(async (req, res) => {
   const body = req.body;
+
   if (!body.url) throw new ApiError(400, "Url is required");
 
   const shortId = nanoid(8);
@@ -18,17 +19,21 @@ const handleGenerateNewShortURL = asyncHandler(async (req, res) => {
   if (req.user) {
     urlData.createdBy = req.user.id;
   } else {
-    // Guest check: only 1 link allowed per IP
-    const existingGuestLink = await URL.findOne({ createdByIp: req.ip });
+    // Guest check: only 1 active link allowed per IP
+    const existingGuestLink = await URL.findOne({
+      createdByIp: req.ip,
+      expiresAt: { $gt: new Date() }
+    });
     if (existingGuestLink) {
       throw new ApiError(
         400,
-        "Guest limit reached (max 1 temporary link). Please log in or sign up to create permanent, unlimited links!"
+        "Guest users can only create one active URL."
       );
     }
     urlData.createdByIp = req.ip;
     // Guest link: valid for 15 minutes
-    urlData.expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    const GUEST_LINK_EXPIRY_TIME = 60 * 1000;
+    urlData.expiresAt = new Date(Date.now() + GUEST_LINK_EXPIRY_TIME);
   }
 
   const url = await URL.create(urlData);
@@ -40,7 +45,13 @@ const handleGenerateNewShortURL = asyncHandler(async (req, res) => {
 
 const handleGetWebsite = asyncHandler(async (req, res) => {
   const entry = await URL.findOneAndUpdate(
-    { shortId: req.params.shortId },
+    {
+      shortId: req.params.shortId,
+      $or: [
+        { expiresAt: { $exists: false } },
+        { expiresAt: { $gt: new Date() } }
+      ]
+    },
     {
       $push: {
         visitedHistory: {
@@ -91,42 +102,29 @@ const handleGetAnalytics = asyncHandler(async (req, res) => {
 });
 
 const handleDeleteUrl = asyncHandler(async (req, res) => {
-  const entry = await URL.findById(req.params.id);
-
-  if (!entry) {
+  const deleted = await URL.findOneAndDelete({
+    _id: req.params.id,
+    createdBy: req.user.id
+  });
+  if (!deleted) {
     throw new ApiError(404, "Url not found");
   }
-
-  if (!entry.createdBy || entry.createdBy.toString() !== req.user.id.toString()) {
-    throw new ApiError(403, "You are not authorized to delete this url");
-  }
-
-  await URL.findByIdAndDelete(req.params.id);
-
   return res
     .status(200)
-    .json(new ApiResponse(200, entry, "Url deleted successfully"));
+    .json(new ApiResponse(200, deleted, "Url deleted successfully"));
 });
 
 const handleUpdateUrl = asyncHandler(async (req, res) => {
-  const entry = await URL.findById(req.params.id);
+  const updatedUrl = await URL.findOneAndUpdate({
+    _id: req.params.id,
+    createdBy: req.user.id
+  }, {
+    redirectUrl: req.body.url
+  }, { new: true });
 
-  if (!entry) {
+  if (!updatedUrl) {
     throw new ApiError(404, "Url not found");
   }
-
-  if (!entry.createdBy || entry.createdBy.toString() !== req.user.id.toString()) {
-    throw new ApiError(403, "You are not authorized to update this url");
-  }
-
-  const { url } = req.body;
-  if (!url) {
-    throw new ApiError(400, "Url is required");
-  }
-
-  const updatedUrl = await URL.findByIdAndUpdate(req.params.id, {
-    redirectUrl: url,
-  }, { new: true });
 
   return res
     .status(200)
@@ -135,7 +133,13 @@ const handleUpdateUrl = asyncHandler(async (req, res) => {
 
 const handleGetPublicStats = asyncHandler(async (req, res) => {
   const shortId = req.params.shortId;
-  const entry = await URL.findOne({ shortId });
+  const entry = await URL.findOne({
+    shortId,
+    $or: [
+      { expiresAt: { $exists: false } },
+      { expiresAt: { $gt: new Date() } }
+    ]
+  });
 
   if (!entry) {
     throw new ApiError(404, "Url not found");

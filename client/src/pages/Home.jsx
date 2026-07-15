@@ -36,6 +36,11 @@ const Home = () => {
     const guestLink = JSON.parse(localStorage.getItem("guest_url") || "null");
 
     if (guestLink) {
+      if (guestLink.expiresAt && new Date(guestLink.expiresAt) <= new Date()) {
+        localStorage.removeItem("guest_url");
+        setUrls([]);
+        return;
+      }
       setUrls([guestLink]);
       try {
         const statsRes = await getPublicStats(guestLink.shortId);
