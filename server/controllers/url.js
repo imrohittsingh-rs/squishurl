@@ -32,7 +32,7 @@ const handleGenerateNewShortURL = asyncHandler(async (req, res) => {
     }
     urlData.createdByIp = req.ip;
     // Guest link: valid for 15 minutes
-    const GUEST_LINK_EXPIRY_TIME = 60 * 1000;
+    const GUEST_LINK_EXPIRY_TIME = 15 * 60 * 1000;
     urlData.expiresAt = new Date(Date.now() + GUEST_LINK_EXPIRY_TIME);
   }
 
