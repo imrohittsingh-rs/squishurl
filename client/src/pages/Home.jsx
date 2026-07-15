@@ -65,7 +65,6 @@ const Home = () => {
   };
 
   const fetchUserUrls = async () => {
-    localStorage.removeItem("guest_url");
     try {
       const resData = await getUserUrls();
       setUrls(resData.data);
