@@ -14,7 +14,7 @@ import { TbWorld } from "react-icons/tb";
 import UrlStats from "./UrlStats";
 
 
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 const UrlCard = ({ url, backendUrl, onDelete, onUpdate, onViewAnalytics, onExpire }) => {
     const [isEditing, setIsEditing] = useState(false);

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import logo from "../assets/images/logo.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 
@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       await login(formData);
-      toast.success("Logged in successfully!");
+      toast.success("Welcome back 🎉");
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password");

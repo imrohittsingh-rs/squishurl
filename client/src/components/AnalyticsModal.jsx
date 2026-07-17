@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { FaXTwitter, FaXmark } from "react-icons/fa6";
 import { getAnalytics } from "../services/urlService";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 const sourceMap = {
   "github.com": {

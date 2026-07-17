@@ -9,7 +9,7 @@ import {
 import UrlCard from "../components/UrlCard";
 import AnalyticsModal from "../components/AnalyticsModal";
 import Loader from "../components/Loader";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 import { FaPlus, FaLink, FaChartSimple, FaArrowPointer } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";

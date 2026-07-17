@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getUserUrls } from "../services/urlService";
 import Loader from "../components/Loader";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 import {
     FaUser,

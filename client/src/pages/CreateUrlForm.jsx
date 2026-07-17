@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { generateShortURL } from "../services/urlService";
 import UrlCard from "../components/UrlCard";
 import AnalyticsModal from "../components/AnalyticsModal";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 import { FaWandMagicSparkles, FaArrowLeft, FaHouse, FaChartLine } from "react-icons/fa6";
 

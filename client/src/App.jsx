@@ -1,7 +1,8 @@
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import AppRoutes from './routes/AppRoutes'
-import { Toaster } from 'react-hot-toast'
+import { Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { useState, useEffect } from 'react'
@@ -29,7 +30,16 @@ const App = () => {
             <AppRoutes />
           </main>
           <Footer />
-          <Toaster position={toastPosition} reverseOrder={false} />
+          <ToastContainer
+            position={toastPosition}
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            transition={Bounce}
+            theme="light"
+          />
         </div>
       </AuthProvider>
     </BrowserRouter>

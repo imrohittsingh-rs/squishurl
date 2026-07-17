@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/images/logo.png";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { FaBars, FaXmark } from "react-icons/fa6";
 
 const Navbar = () => {
@@ -13,7 +13,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     await logout();
     navigate("/login");
-    toast.success("Logged out successfully");
+    toast.info("Logged out successfully");
   };
 
   return (
