@@ -4,9 +4,15 @@ import { useAuth } from "../context/AuthContext";
 import { generateShortURL } from "../services/urlService";
 import UrlCard from "../components/UrlCard";
 import AnalyticsModal from "../components/AnalyticsModal";
+import Loader from "../components/Loader";
 import { toast } from "react-toastify";
 
-import { FaWandMagicSparkles, FaArrowLeft, FaHouse, FaChartLine } from "react-icons/fa6";
+import {
+  FaWandMagicSparkles,
+  FaArrowLeft,
+  FaHouse,
+  FaChartLine,
+} from "react-icons/fa6";
 
 const CreateUrlForm = () => {
   const { user, loading: authLoading } = useAuth();
@@ -17,15 +23,20 @@ const CreateUrlForm = () => {
   const [createdUrl, setCreatedUrl] = useState(null);
   const [activeAnalyticsUrl, setActiveAnalyticsUrl] = useState(null);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
   useEffect(() => {
-    if(authLoading) return;
-    if(!user) {
+    if (authLoading) return;
+    if (!user) {
       navigate("/login");
       return;
     }
   }, [user, authLoading, navigate]);
+
+  if (authLoading) {
+    return <Loader />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +54,9 @@ const CreateUrlForm = () => {
       setCreatedUrl(res.data);
       setUrlInput("");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to generate short URL");
+      toast.error(
+        err.response?.data?.message || "Failed to generate short URL",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -57,13 +70,12 @@ const CreateUrlForm = () => {
   const handleUpdateCreated = (id, updatedUrlStr) => {
     setCreatedUrl((prev) => ({
       ...prev,
-      redirectUrl: updatedUrlStr
+      redirectUrl: updatedUrlStr,
     }));
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-16 animate-fadeIn">
-      
       <div className="mb-6 flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
@@ -90,17 +102,22 @@ const CreateUrlForm = () => {
       </div>
 
       <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-md">
-        
         <div className="mb-6">
-          <h2 className="text-2xl font-black text-gray-950 tracking-tight">Create a Short Link</h2>
+          <h2 className="text-2xl font-black text-gray-950 tracking-tight">
+            Create a Short Link
+          </h2>
           <p className="text-gray-400 text-xs mt-1">
-            Generate an instantly shareable and traceable short URL redirecting to your destination.
+            Generate an instantly shareable and traceable short URL redirecting
+            to your destination.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="url-input" className="block text-xs font-bold text-gray-900 uppercase tracking-wider mb-2">
+            <label
+              htmlFor="url-input"
+              className="block text-xs font-bold text-gray-900 uppercase tracking-wider mb-2"
+            >
               Destination URL
             </label>
             <input
@@ -137,7 +154,7 @@ const CreateUrlForm = () => {
                 Shorten Another
               </button>
             </div>
-            
+
             <UrlCard
               url={createdUrl}
               backendUrl={backendUrl}
@@ -147,7 +164,6 @@ const CreateUrlForm = () => {
             />
           </div>
         )}
-
       </div>
 
       {activeAnalyticsUrl && (
