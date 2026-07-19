@@ -156,6 +156,7 @@ const CreateUrlForm = () => {
             </div>
 
             <UrlCard
+              user={user}
               url={createdUrl}
               backendUrl={backendUrl}
               onDelete={handleDeleteCreated}

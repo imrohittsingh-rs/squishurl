@@ -254,6 +254,7 @@ const Home = () => {
             {urls.map((url, idx) => (
               <UrlCard
                 key={url._id || idx}
+                user={user}
                 url={url}
                 backendUrl={backendUrl}
                 onDelete={handleDelete}

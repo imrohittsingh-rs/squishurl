@@ -15,11 +15,12 @@ import {
   FaLinkedin,
   FaChrome,
   FaEdge,
-  FaSafari
+  FaSafari,
 } from "react-icons/fa6";
 import { FiCopy } from "react-icons/fi";
 import { BsArrowReturnRight } from "react-icons/bs";
-import { HiOutlineCursorClick } from "react-icons/hi"
+import { HiOutlineCursorClick } from "react-icons/hi";
+import { useAuth } from "../context/AuthContext";
 
 import FeatureCard from "../components/FeatureCard";
 
@@ -47,17 +48,20 @@ const CoreFeatures = [
   },
   {
     title: "Analytics Dashboard",
-    description: "Track clicks, traffic sources, browsers, IP addresses, and visit history.",
+    description:
+      "Track clicks, traffic sources, browsers, IP addresses, and visit history.",
     icon: "FaMagnifyingGlass",
   },
   {
     title: "Temporary Guest Link",
-    description: "Guests can create one temporary link that expires automatically.",
+    description:
+      "Guests can create one temporary link that expires automatically.",
     icon: "FaUserClock",
   },
   {
     title: "Manage Links Easily",
-    description: "Update destination URLs, delete links, and monitor analytics.",
+    description:
+      "Update destination URLs, delete links, and monitor analytics.",
     icon: "FaBoltLightning",
   },
 ];
@@ -67,48 +71,48 @@ const actions = [
     label: "Edit Links",
     desc: "Update destination URL anytime",
     icon: <FaPen className="text-blue-500" size={10} />,
-    bg: "bg-blue-50"
+    bg: "bg-blue-50",
   },
   {
     label: "Delete Links",
     desc: "Permanently remove links",
     icon: <FaTrash className="text-red-500" size={10} />,
-    bg: "bg-red-50"
+    bg: "bg-red-50",
   },
   {
     label: "Copy Link",
     desc: "One-click copy to clipboard",
     icon: <FaCopy className="text-zinc-600" size={10} />,
-    bg: "bg-zinc-100"
+    bg: "bg-zinc-100",
   },
   {
     label: "View Analytics",
     desc: "Track total clicks and referrers",
     icon: <FaChartLine className="text-emerald-500" size={10} />,
-    bg: "bg-emerald-50"
+    bg: "bg-emerald-50",
   },
-]
+];
 
 const Features = () => {
-
+  const { user } = useAuth();
   const [links, setLinks] = useState([
     {
       short: "squishurl.in/",
       long: "squishurl.in",
       clicks: 1269,
-      logo: "https://squishurl.vercel.app/favicon.ico"
+      logo: "https://squishurl.vercel.app/favicon.ico",
     },
     {
       short: "squishurl.in/git",
       long: "https://github.com/imrohittsingh-rs/squishurl",
       clicks: 869,
-      logo: "https://github.com/favicon.ico"
+      logo: "https://github.com/favicon.ico",
     },
     {
       short: "squishurl.in/resume",
       long: "imrohittsingh.vercel.app",
       clicks: 613,
-      logo: "https://imrohittsingh.vercel.app/favicon.ico"
+      logo: "https://imrohittsingh.vercel.app/favicon.ico",
     },
   ]);
 
@@ -127,8 +131,6 @@ const Features = () => {
     }, 3800);
     return () => clearInterval(interval);
   }, []);
-
-
 
   const makeTime = (h, m) => {
     const d = new Date();
@@ -189,7 +191,6 @@ const Features = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 pb-20">
-
       <div className="text-center pt-8 pb-16 max-w-2xl mx-auto animate-fadeIn">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -204,13 +205,13 @@ const Features = () => {
           More than just a URL shortener
         </h1>
         <p className="text-gray-500 text-base md:text-lg font-medium leading-relaxed">
-          Create short links, edit destinations, monitor clicks, and manage everything from one dashboard.
+          Create short links, edit destinations, monitor clicks, and manage
+          everything from one dashboard.
         </p>
       </div>
 
       {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
-
         {/* Card 1 */}
         <FeatureCard {...CoreFeatures[0]}>
           <div className="flex flex-col gap-2.5 w-full">
@@ -222,7 +223,14 @@ const Features = () => {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-7 h-7 rounded-lg bg-gray-100 text-black flex items-center justify-center font-bold text-xs shrink-0 select-none overflow-hidden">
-                    <img src={link.logo} alt="" className="w-full h-full object-contain rounded-lg" onError={(e) => { e.target.style.display = "none"; }} />
+                    <img
+                      src={link.logo}
+                      alt=""
+                      className="w-full h-full object-contain rounded-lg"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
                   </div>
                   <div className="min-w-0">
                     <div className="text-md text-gray-900 flex items-center gap-1 min-w-0">
@@ -230,15 +238,25 @@ const Features = () => {
                       <FiCopy className="text-xs ml-2.5 shrink-0 text-gray-400 hover:text-gray-700 transition-colors" />
                     </div>
                     <div className="flex items-center gap-1 text-sm text-gray-400">
-                      <BsArrowReturnRight className="text-black shrink-0" size={10} />
-                      <span className="truncate max-w-[130px] sm:max-w-[180px] hover:underline">{link.long}</span>
+                      <BsArrowReturnRight
+                        className="text-black shrink-0"
+                        size={10}
+                      />
+                      <span className="truncate max-w-[130px] sm:max-w-[180px] hover:underline">
+                        {link.long}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <span className="text-xs font-semibold px-3 py-1 rounded-md bg-[#f4f6f8] text-gray-500 flex items-center gap-1 shrink-0 border border-gray-100">
-                  <HiOutlineCursorClick className="text-blue-500 text-sm" size={18} />
-                  {link.clicks >= 1000 ? `${(link.clicks / 1000).toFixed(1)}k` : link.clicks}
+                  <HiOutlineCursorClick
+                    className="text-blue-500 text-sm"
+                    size={18}
+                  />
+                  {link.clicks >= 1000
+                    ? `${(link.clicks / 1000).toFixed(1)}k`
+                    : link.clicks}
                 </span>
               </div>
             ))}
@@ -248,13 +266,19 @@ const Features = () => {
         {/* Card 2*/}
         <FeatureCard {...CoreFeatures[1]}>
           <div className="flex flex-col gap-2.5 w-full h-full justify-between">
-
             <div className="flex justify-between items-start w-full border-b border-gray-200/40 pb-2">
               <div className="min-w-0">
-                <span className="text-md text-gray-900 block">squishurl.in/resume</span>
+                <span className="text-md text-gray-900 block">
+                  squishurl.in/resume
+                </span>
                 <span className="flex items-center gap-1 text-sm text-gray-400 ">
-                  <BsArrowReturnRight className="text-black shrink-0" size={10} />
-                  <span className="truncate max-w-[160px] hover:underline cursor-pointer" >imrohittsingh.vercel.app</span>
+                  <BsArrowReturnRight
+                    className="text-black shrink-0"
+                    size={10}
+                  />
+                  <span className="truncate max-w-[160px] hover:underline cursor-pointer">
+                    imrohittsingh.vercel.app
+                  </span>
                 </span>
               </div>
 
@@ -265,13 +289,16 @@ const Features = () => {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-3 flex-1 items-stretch lg:items-center min-h-0 w-full">
-
               <div className="w-full lg:w-[95px] bg-gray-50 border border-gray-200/50 py-2 px-1 rounded-xl text-center select-none shrink-0 flex flex-col justify-center overflow-hidden h-[62px] shadow-2xs">
-                <span className="text-[8px] text-gray-400 font-extrabold uppercase tracking-wider block">Total Clicks</span>
+                <span className="text-[8px] text-gray-400 font-extrabold uppercase tracking-wider block">
+                  Total Clicks
+                </span>
                 <div className="h-8 overflow-hidden flex items-center justify-center mt-0.5">
-                  {String(liveClicks).split("").map((char, idx) => (
-                    <Digit key={idx} char={char} />
-                  ))}
+                  {String(liveClicks)
+                    .split("")
+                    .map((char, idx) => (
+                      <Digit key={idx} char={char} />
+                    ))}
                 </div>
               </div>
 
@@ -290,11 +317,18 @@ const Features = () => {
                         <motion.tr
                           key={visit.source}
                           layout
-                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 25,
+                          }}
                           className={`${index % 2 ? "" : "bg-gray-100/60"} transition-colors`}
                         >
                           <td className="px-3 py-2 whitespace-nowrap">
-                            {new Date(visit.time).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                            {new Date(visit.time).toLocaleTimeString("en-IN", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
                             <span className="flex items-center gap-1 text-gray-800 font-semibold">
@@ -320,9 +354,10 @@ const Features = () => {
 
         {/* Card 3*/}
         <FeatureCard {...CoreFeatures[2]}>
-
           <div className="flex justify-between items-center w-full border-b border-gray-200/40 pb-2">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Guest Link</span>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              Guest Link
+            </span>
             <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-100 shrink-0 uppercase tracking-wider">
               Expires Soon
             </span>
@@ -330,7 +365,9 @@ const Features = () => {
 
           <div className="bg-white border border-gray-200/50 rounded-xl p-3 shadow-2xs flex-grow flex flex-col justify-between my-2">
             <div className="min-w-0">
-              <span className="text-md text-gray-900 block">squishurl.in/guest-abc</span>
+              <span className="text-md text-gray-900 block">
+                squishurl.in/guest-abc
+              </span>
               <div className="flex items-center gap-1 text-sm text-gray-400 mt-0.5">
                 <BsArrowReturnRight className="text-black shrink-0" size={10} />
                 <span className="truncate max-w-[160px]">guest.vercel.app</span>
@@ -339,7 +376,11 @@ const Features = () => {
 
             <div className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-orange-100 bg-orange-50/50 text-[12px] font-semibold text-orange-500 my-1 select-none font-mono">
               <FaRegClock className="text-[12px] shrink-0 animate-pulse" />
-              {timeLeft ? <span>Expires in {formatTime(timeLeft)}</span> : <span>Expired</span>}
+              {timeLeft ? (
+                <span>Expires in {formatTime(timeLeft)}</span>
+              ) : (
+                <span>Expired</span>
+              )}
             </div>
 
             <div className="flex gap-2">
@@ -355,7 +396,6 @@ const Features = () => {
 
         {/* Card 4*/}
         <FeatureCard {...CoreFeatures[3]}>
-
           {/* Simple list of action items */}
           <div className="grow flex flex-col justify-center gap-2 w-full my-1.5">
             {actions.map((action, idx) => (
@@ -364,12 +404,18 @@ const Features = () => {
                 className="flex items-center justify-between bg-white border border-gray-200/50 p-2.5 rounded-xl shadow-2xs hover:bg-gray-50/50 transition-colors select-none group/row"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-6 h-6 rounded-lg ${action.bg} flex items-center justify-center shrink-0`}>
+                  <div
+                    className={`w-6 h-6 rounded-lg ${action.bg} flex items-center justify-center shrink-0`}
+                  >
                     {action.icon}
                   </div>
                   <div className="min-w-0 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
-                    <span className="text-sm text-gray-900 font-bold sm:font-normal leading-normal sm:w-[115px] sm:shrink-0 text-left">{action.label}</span>
-                    <span className="text-xs text-gray-400 truncate leading-normal">{action.desc}</span>
+                    <span className="text-sm text-gray-900 font-bold sm:font-normal leading-normal sm:w-[115px] sm:shrink-0 text-left">
+                      {action.label}
+                    </span>
+                    <span className="text-xs text-gray-400 truncate leading-normal">
+                      {action.desc}
+                    </span>
                   </div>
                 </div>
 
@@ -381,7 +427,6 @@ const Features = () => {
             ))}
           </div>
         </FeatureCard>
-
       </div>
 
       {/* Footer Section */}
@@ -396,19 +441,38 @@ const Features = () => {
             or try SquishURL instantly as a guest.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              to="/signup"
-              className="w-full sm:w-auto bg-black hover:bg-zinc-950 text-white font-semibold px-6 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
-            >
-              Get Started for Free
-              <FaArrowRight size={14} />
-            </Link>
-            <Link
-              to="/login"
-              className="w-full sm:w-auto bg-white hover:bg-gray-50 text-gray-700 font-semibold border border-gray-200 px-6 py-3.5 rounded-xl text-sm transition-all flex items-center justify-center active:scale-[0.98] cursor-pointer"
-            >
-              Log In
-            </Link>
+            {!user ? (
+              <Link
+                to="/signup"
+                className="w-full sm:w-auto bg-black hover:bg-zinc-950 text-white font-semibold px-6 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
+              >
+                Get Started for Free
+                <FaArrowRight size={14} />
+              </Link>
+            ) : (
+              <Link
+                to="/create-url"
+                className="w-full sm:w-auto bg-black hover:bg-zinc-950 text-white font-semibold px-6 py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
+              >
+                Create Your Own Link
+                <FaArrowRight size={14} />
+              </Link>
+            )}
+            {!user ? (
+              <Link
+                to="/login"
+                className="w-full sm:w-auto bg-white hover:bg-gray-50 text-gray-700 font-semibold border border-gray-200 px-6 py-3.5 rounded-xl text-sm transition-all flex items-center justify-center active:scale-[0.98] cursor-pointer"
+              >
+                Log In
+              </Link>
+            ) : (
+              <Link
+                to="/dashboard"
+                className="w-full sm:w-auto bg-white hover:bg-gray-50 text-gray-700 font-semibold border border-gray-200 px-6 py-3.5 rounded-xl text-sm transition-all flex items-center justify-center active:scale-[0.98] cursor-pointer"
+              >
+                Dashboard
+              </Link>
+            )}
           </div>
         </div>
       </div>

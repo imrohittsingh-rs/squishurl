@@ -224,6 +224,7 @@ const Dashboard = () => {
             {filteredUrls.map((url) => (
               <UrlCard
                 key={url._id}
+                user={user}
                 url={url}
                 backendUrl={backendUrl}
                 onDelete={handleDelete}
