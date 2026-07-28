@@ -11,6 +11,9 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
+    if (!window.confirm("Are you sure you want to logout?")) {
+      return;
+    }
     await logout();
     navigate("/login");
     toast.info("Logged out successfully");
