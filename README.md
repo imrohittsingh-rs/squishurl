@@ -1,6 +1,6 @@
-# Shortly 🔗 - Modern URL Shortener & Analytics Platform
+# SquishURL 🔗 - Modern URL Shortener & Analytics Platform
 
-Shortly is a full-featured, self-hostable, modern URL shortener built with a React frontend and a Node.js/Express backend. It allows users to quickly shorten long URLs, generate QR codes, and track detailed visit analytics.
+SquishURL is a full-featured, self-hostable, modern URL shortener built with a React frontend and a Node.js/Express backend. It allows users to quickly shorten long URLs, generate QR codes, and track detailed visit analytics.
 
 <p align="left">
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB" alt="React" /></a>

@@ -27,7 +27,7 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl font-bold tracking-tight text-gray-900 shrink-0">
               <img src={logo} alt="SquishUrl Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain rounded-lg" />
-              <span>SquishUrl</span>
+              <span>SquishURL</span>
             </Link>
             
             <div className="hidden md:flex items-center gap-4 border-l border-gray-200 pl-4">
